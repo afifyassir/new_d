@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from model.config.core import config  # noqa: E402
 from model.pipeline import pipe  # noqa: E402
-from model.preprocessing.data_manager import load_dataset, save_pipeline  # noqa: E402
+from model.preprocessing.data_manager import load_dataset, persist_pipeline  # noqa: E402
 
 
 def run_training() -> None:
@@ -39,7 +39,7 @@ def run_training() -> None:
     pipe.fit(X_train, y_train)
 
     # persist trained model
-    save_pipeline(pipeline_to_persist=pipe)
+    persist_pipeline(pipeline=pipe)
 
 
 if __name__ == "__main__":

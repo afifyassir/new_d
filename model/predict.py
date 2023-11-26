@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from model import __version__ as _version  # noqa: E402
 from model.config.core import config  # noqa: E402
 from model.preprocessing.data_manager import load_pipeline  # noqa: E402
-from model.preprocessing.validation import validate_inputs  # noqa: E402
+from model.preprocessing.validation import check_inputs  # noqa: E402
 
 pipeline_file_name = f"{config.app_config.pipeline_save_file}{_version}.pkl"
 _pipe = load_pipeline(file_name=pipeline_file_name)
@@ -23,7 +23,7 @@ async def make_prediction(
     """Make a prediction using a saved model pipeline."""
 
     data = pd.DataFrame(input_data)
-    validated_data, errors = validate_inputs(input_data=data)
+    validated_data, errors = check_inputs(input_data=data)
     results = {"predictions": None, "version": _version, "errors": errors}
 
     if not errors:

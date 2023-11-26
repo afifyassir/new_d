@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 from pathlib import Path
 from typing import List
 
@@ -18,8 +19,11 @@ logger = logging.getLogger(__name__)
 
 def load_dataset(*, client_file_name: str, price_file_name: str) -> pd.DataFrame:
     # Loading the datasets.
-    dataframe_client = pd.read_csv(Path(f"{DATASET_DIR}/{client_file_name}"))
-    dataframe_price = pd.read_csv(Path(f"{DATASET_DIR}/{price_file_name}"))
+    client_data_path = os.path.join(DATASET_DIR, client_file_name)
+    price_data_path = os.path.join(DATASET_DIR, price_file_name)
+
+    dataframe_client = pd.read_csv(client_data_path)
+    dataframe_price = pd.read_csv(price_data_path)
 
     # Converting to datetime.
     dataframe_client = datetime_conversion_client(df=dataframe_client)
@@ -56,40 +60,47 @@ def load_dataset(*, client_file_name: str, price_file_name: str) -> pd.DataFrame
     return dataframe
 
 
-def save_pipeline(*, pipeline_to_persist: Pipeline) -> None:
-    """Persist the pipeline.
-    Saves the versioned model, and overwrites any previous
-    saved models. This ensures that when the package is
-    published, there is only one trained model that can be
-    called, and we know exactly how it was built.
+def persist_pipeline(*, pipeline: Pipeline) -> None:
+    """
+    Persist the pipeline.
+    This function saves the provided pipeline as a versioned pickle file,
+    overwriting any previously saved models. This ensures that there is
+    only one version of the trained model available at a time, providing
+    clarity on its build process.
     """
 
     # Prepare versioned save file name
     save_file_name = f"{config.app_config.pipeline_save_file}{_version}.pkl"
-    save_path = TRAINED_MODEL_DIR / save_file_name
+    save_path = os.path.join(TRAINED_MODEL_DIR, save_file_name)
 
-    remove_old_pipelines(files_to_keep=[save_file_name])
-    joblib.dump(pipeline_to_persist, save_path)
+    # Remove old pipelines, keeping only the current one
+    clean_up_old_pipelines(retain_files=[save_file_name])
+
+    # Save the current pipeline
+    joblib.dump(pipeline, save_path)
 
 
 def load_pipeline(*, file_name: str) -> Pipeline:
     """Load a persisted pipeline."""
 
-    file_path = TRAINED_MODEL_DIR / file_name
-    return joblib.load(filename=file_path)
+    file_path = os.path.join(TRAINED_MODEL_DIR,file_name)
+
+    pipe = joblib.load(filename=file_path)
+
+    return pipe
 
 
-def remove_old_pipelines(*, files_to_keep: List[str]) -> None:
+def clean_up_old_pipelines(*, retain_files: List[str]) -> None:
     """
-    Remove old model pipelines.
-    This is to ensure there is a simple one-to-one
-    mapping between the package version and the model
-    version to be imported and used by other applications.
+    Clean up old model pipelines.
+    This function removes old model pipelines, ensuring that there is a clear
+    one-to-one mapping between the package version and the model version. This
+    makes it easier to manage and use the models in other applications.
     """
-    do_not_delete = files_to_keep + ["__init__.py"]
-    for model_file in TRAINED_MODEL_DIR.iterdir():
-        if model_file.name not in do_not_delete:
-            model_file.unlink()
+    retain_files.append("__init__.py")
+    for model_file in os.listdir(TRAINED_MODEL_DIR):
+        if model_file not in retain_files:
+            os.remove(os.path.join(TRAINED_MODEL_DIR, model_file))
 
 
 def datetime_conversion_client(df: pd.DataFrame) -> pd.DataFrame:
