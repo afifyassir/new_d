@@ -7,7 +7,7 @@ from pydantic import BaseModel
 # Add the root of your project to the Python path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from model.preprocessing.validation import DataInputSchema  # noqa: E402
+from model.preprocessing.validation_classes import DataInputSchema  # noqa: E402
 
 
 class PredictionResults(BaseModel):

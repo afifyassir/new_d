@@ -1,5 +1,6 @@
-from typing import List, Optional, Tuple
-from pydantic import BaseModel, ValidationError  # noqa: E402
+from typing import List, Optional
+
+from pydantic import BaseModel
 
 
 class DataInputSchema(BaseModel):

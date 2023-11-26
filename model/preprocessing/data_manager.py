@@ -1,6 +1,6 @@
 import logging
-import sys
 import os
+import sys
 from pathlib import Path
 from typing import List
 
@@ -83,7 +83,7 @@ def persist_pipeline(*, pipeline: Pipeline) -> None:
 def load_pipeline(*, file_name: str) -> Pipeline:
     """Load a persisted pipeline."""
 
-    file_path = os.path.join(TRAINED_MODEL_DIR,file_name)
+    file_path = os.path.join(TRAINED_MODEL_DIR, file_name)
 
     pipe = joblib.load(filename=file_path)
 

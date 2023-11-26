@@ -16,12 +16,15 @@ from model.preprocessing.data_manager import load_dataset  # noqa: E402
 
 @pytest.fixture(scope="module")
 def test_data() -> pd.DataFrame:
-    return pd.DataFrame(
-        load_dataset(
-            client_file_name=config.app_config.client_data_file,
-            price_file_name=config.app_config.price_data_file,
-        ).iloc[0]
-    ).T
+
+    loaded_test_example = load_dataset(
+        client_file_name=config.app_config.client_data_file,
+        price_file_name=config.app_config.price_data_file,
+    ).iloc[0]
+
+    test_example = pd.DataFrame(loaded_test_example).T
+
+    return test_example
 
 
 @pytest.fixture()

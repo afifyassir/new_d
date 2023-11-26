@@ -30,4 +30,6 @@ def sample_input_data():
         # for reproducibility
         random_state=config.model_config.random_state,
     )
-    return (X_test, y_test)
+    test_data = (X_test, y_test)
+
+    return test_data

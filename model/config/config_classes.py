@@ -1,5 +1,6 @@
+from typing import Sequence
+
 from pydantic import BaseModel
-from typing import Optional, Sequence
 
 
 # Configuration related to the application

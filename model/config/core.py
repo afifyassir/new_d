@@ -1,17 +1,15 @@
-import sys
 import os
+import sys
 from pathlib import Path
-from typing import Optional, Sequence
+from typing import Optional
 
 # Add the root of your project to the Python path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
-from pydantic import BaseModel  # noqa: E402
 from strictyaml import YAML, load  # noqa: E402
-from model.config.config_classes import AppConfig, ModelConfig, Config
 
 import model  # noqa: E402
-
+from model.config.config_classes import AppConfig, Config, ModelConfig  # noqa: E402
 
 PACKAGE_ROOT = os.path.dirname(os.path.abspath(model.__file__))
 ROOT = os.path.dirname(PACKAGE_ROOT)
@@ -22,7 +20,7 @@ TRAINED_MODEL_DIR = os.path.join(PACKAGE_ROOT, "trained_models")
 
 def yaml_config_file_location() -> str:
     """Find the location of the configuration file.
-       Return the location if found, otherwise raise an exception."""
+    Return the location if found, otherwise raise an exception."""
 
     try:
         assert os.path.isfile(CONFIG_FILE_PATH)
@@ -42,7 +40,7 @@ def fetching_yaml_file(file_path: Optional[str] = None) -> YAML:
             parsed_config = load(yml_file.read())
             return parsed_config
     except FileNotFoundError:
-        raise OSError(f"YAML file not found")
+        raise OSError("YAML file not found")
 
 
 def validate_config(parsed_config: YAML = None) -> Config:
@@ -61,7 +59,3 @@ def validate_config(parsed_config: YAML = None) -> Config:
 
 
 config = validate_config()
-print(PACKAGE_ROOT)
-print(config)
-
-

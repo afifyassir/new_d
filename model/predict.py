@@ -23,7 +23,7 @@ async def make_prediction(
     """Make a prediction using a saved model pipeline."""
 
     data = pd.DataFrame(input_data)
-    validated_data, errors = check_inputs(input_data=data)
+    validated_data, errors = check_inputs(data=data)
     results = {"predictions": None, "version": _version, "errors": errors}
 
     if not errors:

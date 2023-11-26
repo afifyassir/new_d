@@ -1,17 +1,17 @@
 import json
 import sys
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional, Tuple
 
 # Add the root of your project to the Python path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
-from pydantic import BaseModel, ValidationError  # noqa: E402
+from pydantic import ValidationError  # noqa: E402
 
 from model.config.core import config  # noqa: E402
-from model.preprocessing.validation_classes import MultipleDataInputs, DataInputSchema
+from model.preprocessing.validation_classes import MultipleDataInputs  # noqa: E402
 
 
 def check_inputs(*, data: pd.DataFrame) -> Tuple[pd.DataFrame, Optional[dict]]:

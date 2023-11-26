@@ -8,7 +8,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from model.config.core import config  # noqa: E402
 from model.pipeline import pipe  # noqa: E402
-from model.preprocessing.data_manager import load_dataset, persist_pipeline  # noqa: E402
+from model.preprocessing.data_manager import load_dataset  # noqa: E402
+from model.preprocessing.data_manager import persist_pipeline  # noqa: E402
 
 
 def run_training() -> None:
