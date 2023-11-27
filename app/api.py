@@ -1,4 +1,3 @@
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -24,14 +23,12 @@ api_router = APIRouter()
 
 @api_router.get("/health", response_model=Health, status_code=200)
 def health() -> dict:
-    """
-    Root Get
-    """
-    health = Health(
-        name=settings.PROJECT_NAME, api_version=__version__, model_version=model_version
-    )
 
-    return health.dict()
+    health_info = Health(
+        name=settings.PROJECT_NAME, api_version=__version__, model_version=model_version
+    ).dict()
+
+    return health_info
 
 
 @api_router.post("/predict", response_model=PredictionResults, status_code=200)
@@ -40,15 +37,22 @@ async def predict(input_data: MultipleDataInputs) -> Any:
     Predicting customer churn
     """
 
-    input_df = pd.DataFrame(jsonable_encoder(input_data.inputs))
+    try:
+        # Convert input data to DataFrame and replace NaN values with None
+        input_df = pd.DataFrame(jsonable_encoder(input_data.inputs)).replace(
+            {np.nan: None}
+        )
 
-    logger.info(f"Making prediction on inputs: {input_data.inputs}")
-    results = await make_prediction(input_data=input_df.replace({np.nan: None}))
+        # Log the input data
+        logger.info(f"Received input data: {input_data.inputs}")
 
-    if results["errors"] is not None:
-        logger.warning(f"Prediction validation error: {results.get('errors')}")
-        raise HTTPException(status_code=400, detail=json.loads(results["errors"]))
+        # Make predictions using the trained model
+        predictions = await make_prediction(input_data=input_df)
 
-    logger.info(f"Prediction results: {results.get('predictions')}")
+        # Log and return the prediction results
+        logger.info(f"Prediction results: {predictions.get('predictions')}")
+        return predictions
 
-    return results
+    except Exception as e:  # Handle any exceptions during prediction
+        logger.error(f"Prediction failed: {e}")
+        raise HTTPException(status_code=500, detail="Prediction failed")

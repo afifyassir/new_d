@@ -15,9 +15,6 @@ from model.preprocessing.data_manager import persist_pipeline  # noqa: E402
 def run_training() -> None:
     """
     Train the model.
-
-    Training data can be found here:
-    https://www.openml.org/data/get_csv/16826755/phpMYEkMl
     """
 
     # read training data
