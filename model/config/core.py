@@ -43,6 +43,8 @@ def fetching_yaml_file(file_path: Optional[str] = None) -> YAML:
         raise OSError("YAML file not found")
 
 
+# The validate_config function uses these classes to parse the configuration from a YAML file,
+# validate it, and return a Config object that you can use in your application.
 def validate_config(parsed_config: YAML = None) -> Config:
     """Validate values of our configuration."""
     parsed_config = parsed_config or fetching_yaml_file()
@@ -53,9 +55,9 @@ def validate_config(parsed_config: YAML = None) -> Config:
     model_config = ModelConfig(**parsed_config.data)
 
     # Combine the validated app_config and model_config into a single Config object.
-    config = Config(app_config=app_config, model_config=model_config)
+    conf = Config(app_config=app_config, model_config=model_config)
 
-    return config
+    return conf
 
 
 config = validate_config()

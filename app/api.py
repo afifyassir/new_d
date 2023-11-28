@@ -18,11 +18,16 @@ from app.schemas.predict import MultipleDataInputs, PredictionResults  # noqa: E
 from model import __version__ as model_version  # noqa: E402
 from model.predict import make_prediction  # noqa: E402
 
+#  Create an instance of APIRouter. This will be used to define the API endpoints.
 api_router = APIRouter()
 
 
 @api_router.get("/health", response_model=Health, status_code=200)
 def health() -> dict:
+
+    """ the decorator and this function will help us define a GET endpoint at /health, when accessed,
+        it returns a Health object containing the project name, API version, and model version.
+     """
 
     health_info = Health(
         name=settings.PROJECT_NAME, api_version=__version__, model_version=model_version
