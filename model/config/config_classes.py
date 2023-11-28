@@ -2,7 +2,6 @@ from typing import Sequence
 
 from pydantic import BaseModel
 
-
 # The AppConfig and ModelConfig classes are used to define the structure of the configuration for the application and
 # model respectively. They are subclasses of BaseModel from the pydantic library, which is a data validation library
 # in Python.
