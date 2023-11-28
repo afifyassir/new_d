@@ -6,9 +6,13 @@ from typing import List, cast
 from loguru import logger
 from pydantic import AnyHttpUrl, BaseSettings
 
-# LoggingSettings has a single field for the logging level
+
+# Set the logging level for the application. The logging level is an integer value that represents
+# the severity level at which the logger should start reporting log messages.
+# BaseSettings inherits from BaseModel and is specifically designed for application settings and
+# configuration, with additional features for loading data from various sources.
 class LoggingSettings(BaseSettings):
-    LOGGING_LEVEL: int = logging.INFO  # logging levels are type int
+    LOGGING_LEVEL: int = logging.INFO
 
 
 # Settings has several fields for various application settings, including the API
@@ -16,11 +20,11 @@ class LoggingSettings(BaseSettings):
 class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
-    # Meta
     logging: LoggingSettings = LoggingSettings()
 
-    # BACKEND_CORS_ORIGINS is a comma-separated list of origins
-    # e.g: http://localhost,http://localhost:4200,http://localhost:3000
+    # This is a list of URLs that are allowed to make cross-origin requests to the API.
+    # Cross-Origin Resource Sharing (CORS) is a mechanism that allows many resources
+    # on a web page to be requested from another domain outside the domain from which the resource originated.
     BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
         "http://localhost:3000",  # type: ignore
         "http://localhost:8000",  # type: ignore
@@ -30,6 +34,8 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "Predicting customer churn API"
 
+    # The nested Config class with a single attribute case_sensitive set to True. This means that the
+    # environment variables used to set these settings must match the case of the field names.
     class Config:
         case_sensitive = True
 
@@ -42,15 +48,27 @@ class InterceptHandler(logging.Handler):
         standard logging module and redirects them to loguru. This allows us to use loguru's features
         with libraries that use the standard logging module.
     """
+
     def emit(self, record: logging.LogRecord) -> None:  # pragma: no cover
-        # Get corresponding Loguru level if it exists
+
+        """
+        The emit method is overridden to customize the handling of log records.
+        This method is called whenever a log record needs to be processed.
+        """
+
+        # try to get the corresponding loguru level for the log record. If it doesn't exist,
+        # fall back to the original level number from the log record.
         try:
             level = logger.level(record.levelname).name
         except ValueError:
             level = str(record.levelno)
 
-        # Find caller from where originated the logged message
+        #  Find the frame and depth from where the logged message originated.
+        #  This information is used to correctly attribute the log message in loguru.
         frame, depth = logging.currentframe(), 2
+
+        # log the message using loguru with the determined level, depth, and
+        # exception information from the log record.
         while frame.f_code.co_filename == logging.__file__:  # noqa: WPS609
             frame = cast(FrameType, frame.f_back)
             depth += 1
@@ -64,12 +82,13 @@ class InterceptHandler(logging.Handler):
 def setup_app_logging(config: Settings) -> None:
 
     """
-    This function sets up the application's logging using the provided settings.
-    It replaces the handlers of the root logger and several other loggers with instances
-    of InterceptHandler, and configures loguru with a handler that writes to sys.stderr.
+    This function configures the application’s logging system to use loguru for outputting log messages,
+    and to use the InterceptHandler to ensure that log messages from the standard logging library
+    (used by uvicorn and potentially other libraries) are also handled by loguru. The logging level
+    is configured based on the application settings.
     """
 
-    # configuring the loggers for uvicorn, which is the ASGI server running the application.
+    # Configuring the loggers for uvicorn, which is the ASGI server running the application.
     LOGGERS = ("uvicorn.asgi", "uvicorn.access")
 
     # Setting the handler for the root logger to an instance of InterceptHandler
@@ -83,6 +102,7 @@ def setup_app_logging(config: Settings) -> None:
     for logger_name in LOGGERS:
         logging_logger = logging.getLogger(logger_name)
         logging_logger.handlers = [InterceptHandler(level=config.logging.LOGGING_LEVEL)]
+
     # Configuring the loguru's logger. The handlers parameter is a list of handlers, and
     # each handler is a dictionary that specifies a sink and a level. The sink is where
     # the log messages will be outputted, and in this case, it’s sys.stderr, meaning log messages
@@ -91,6 +111,5 @@ def setup_app_logging(config: Settings) -> None:
     logger.configure(
         handlers=[{"sink": sys.stderr, "level": config.logging.LOGGING_LEVEL}]
     )
-
 
 settings = Settings()
