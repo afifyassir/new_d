@@ -21,13 +21,25 @@ from model.predict import make_prediction  # noqa: E402
 #  Create an instance of APIRouter. This will be used to define the API endpoints.
 api_router = APIRouter()
 
+# In FastAPI, the response_model parameter in the @api_router.get or @api_router.post decorator is used
+#  to define the model for the data that the endpoint returns. This model is used for:
+# - Output Data Conversion: The returned data will be converted into the defined model's structure.
+#   If the data doesn't fit the model, an error will occur.
+# - Data Validation: The returned data will be validated against the model. If the data is invalid, an error will occur.
+# - Automatic API Documentation: The model will be used to generate interactive API documentation.
+
+# The status_code parameter in FastAPI route decorators like @api_router.get or @api_router.post
+# is used to specify the HTTP status code that should be returned when the request is successful.
+
 
 @api_router.get("/health", response_model=Health, status_code=200)
 def health() -> dict:
 
-    """ the decorator and this function will help us define a GET endpoint at /health, when accessed,
-        it returns a Health object containing the project name, API version, and model version.
-     """
+    """
+    The API router decorator and this function will help us define a GET endpoint at /health, when accessed,
+    it returns a Health object containing the project name, API version, and model version.
+    This endpoint is typically used for monitoring and checking the status of the API.
+    """
 
     health_info = Health(
         name=settings.PROJECT_NAME, api_version=__version__, model_version=model_version
@@ -39,7 +51,10 @@ def health() -> dict:
 @api_router.post("/predict", response_model=PredictionResults, status_code=200)
 async def predict(input_data: MultipleDataInputs) -> Any:
     """
-    Predicting customer churn
+    It defines a POST endpoint at /predict. It takes an instance of MultipleDataInputs as input.
+    Inside the endpoint, the input data is converted to a DataFrame and passed to
+    the make_prediction function. If there are any errors in the prediction, an HTTP exception
+    is raised. Otherwise, the prediction results are returned.
     """
 
     try:
